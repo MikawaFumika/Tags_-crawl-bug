@@ -1,0 +1,74 @@
+
+library("xml2")
+
+library("rvest")
+
+library("dplyr")
+
+library("stringr")
+
+max_index=399102
+
+Tags_barrel=c()
+
+Times=10000
+shows=50
+moviestep=100
+Eroortimes=0
+
+
+for(bug_times in 1:Times)
+{
+  index=sample(1:max_index,size=1)
+  url=paste0('https://',index,'/')
+
+web=try(read_html(url))
+web=as.character(web)
+if(as.character(substr(web, start = 1, stop = 5))!='Error')
+   
+{
+
+Tags=strsplit(web,split="tag-container field-name")
+Tags=unlist(Tags)[4]
+
+Tags=strsplit(Tags,split='<span class="name">')
+Tags=unlist(Tags)
+L_of_Tags=length(Tags)
+
+for(tag_numbers in 2:L_of_Tags)
+{
+Tags_barrel=c(Tags_barrel,unlist(strsplit(Tags[tag_numbers],split='<'))[1])
+}
+
+Sys.sleep(0.5)
+}
+
+
+if(as.integer(bug_times/moviestep)==(bug_times/moviestep))
+{
+  print(bug_times/moviestep)
+}
+
+}
+
+#统计
+
+Unique_Tags=unique(Tags_barrel)
+Tag_length=length(Unique_Tags)
+Frequency_of_tags=c()
+
+for(T_L in 1:Tag_length)
+{
+  Frequency_of_tags=c(Frequency_of_tags,length(which(Tags_barrel==Unique_Tags[T_L])))
+}
+
+
+Tags_d <- data.frame(Unique_Tags,Frequency_of_tags)
+Tags_d=Tags_d[order(Tags_d$Frequency_of_tags,decreasing = T),]
+
+Unique_Tags=as.vector(unlist(Tags_d[1]))
+Frequency_of_tags=as.numeric(unlist((Tags_d[2])))
+par(mar=c(10,3,1,1))
+barplot(Frequency_of_tags[1:shows],xlab='',ylab='',main='',col='blue', names.arg=Unique_Tags[1:shows],cex.names = 0.8, las=2)
+
+length(Tags_barrel)
